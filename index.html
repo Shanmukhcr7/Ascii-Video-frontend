@@ -1,24 +1,41 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>🎨 ASCII Video Converter</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🎞️ ASCII Video Converter</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="container">
-    <h1>🎞️ ASCII Video Converter</h1>
-    <form id="uploadForm">
-      <label>Select video file:</label><br>
-      <input type="file" id="videoInput" accept="video/*" required><br><br>
-      <label>Width:</label><br>
-      <input type="number" id="widthInput" value="80" min="40" max="160"><br><br>
-      <label>Brightness (0.5 - 2.0):</label><br>
-      <input type="number" id="brightnessInput" value="1.0" step="0.1" min="0.5" max="2"><br><br>
-      <button type="submit">Convert to ASCII</button>
-    </form>
-    <div id="status"></div>
+    <h1>🎨 ASCII Video Converter</h1>
+    <p class="subtitle">Convert your videos into colorful ASCII art text files!</p>
+
+    <div class="upload-area" id="upload-area">
+      <p>📂 Drag & Drop or <span id="browse">Browse</span> to upload</p>
+      <input type="file" id="videoInput" accept="video/*" hidden />
+      <video id="preview" controls></video>
+    </div>
+
+    <div class="controls">
+      <label>ASCII Width:</label>
+      <input type="number" id="width" min="40" max="200" value="80" />
+      
+      <label>Brightness:</label>
+      <input type="range" id="brightness" min="0.5" max="2.0" value="1.0" step="0.1" />
+      <span id="brightness-value">1.0</span>
+    </div>
+
+    <button id="convertBtn">🎬 Convert to ASCII</button>
+
+    <div class="progress">
+      <div id="progress-bar"></div>
+    </div>
+    <p id="progress-text"></p>
+
+    <p id="status"></p>
   </div>
+
   <script src="script.js"></script>
 </body>
 </html>
