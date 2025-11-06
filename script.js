@@ -1,44 +1,107 @@
-const form = document.getElementById("uploadForm");
+const backendURL = "https://ascii-video.onrender.com/convert";
+
 const videoInput = document.getElementById("videoInput");
-const widthInput = document.getElementById("widthInput");
-const brightnessInput = document.getElementById("brightnessInput");
-const statusBox = document.getElementById("status");
+const uploadArea = document.getElementById("upload-area");
+const browse = document.getElementById("browse");
+const preview = document.getElementById("preview");
+const convertBtn = document.getElementById("convertBtn");
+const progressBar = document.getElementById("progress-bar");
+const progressText = document.getElementById("progress-text");
+const statusText = document.getElementById("status");
+const brightnessInput = document.getElementById("brightness");
+const brightnessValue = document.getElementById("brightness-value");
 
-// ✅ Replace this with your Render API URL
-const API_URL = "https://ascii-video.onrender.com/convert";
+let selectedFile = null;
 
-form.addEventListener("submit", async (e) => {
+// Drag & drop handlers
+uploadArea.addEventListener("dragover", (e) => {
   e.preventDefault();
+  uploadArea.style.background = "#21262d";
+});
+uploadArea.addEventListener("dragleave", () => {
+  uploadArea.style.background = "transparent";
+});
+uploadArea.addEventListener("drop", (e) => {
+  e.preventDefault();
+  selectedFile = e.dataTransfer.files[0];
+  showPreview(selectedFile);
+});
 
-  const file = videoInput.files[0];
-  if (!file) {
-    alert("Please choose a video file.");
+browse.addEventListener("click", () => videoInput.click());
+videoInput.addEventListener("change", (e) => {
+  selectedFile = e.target.files[0];
+  showPreview(selectedFile);
+});
+
+brightnessInput.addEventListener("input", () => {
+  brightnessValue.textContent = brightnessInput.value;
+});
+
+function showPreview(file) {
+  if (!file) return;
+  const url = URL.createObjectURL(file);
+  preview.src = url;
+  preview.style.display = "block";
+}
+
+// Handle conversion
+convertBtn.addEventListener("click", async () => {
+  if (!selectedFile) {
+    alert("Please upload a video first!");
     return;
   }
 
-  const formData = new FormData();
-  formData.append("video", file);
-  formData.append("width", widthInput.value);
-  formData.append("brightness", brightnessInput.value);
+  const width = document.getElementById("width").value;
+  const brightness = brightnessInput.value;
 
-  statusBox.innerText = "⏳ Converting... please wait.";
+  const formData = new FormData();
+  formData.append("video", selectedFile);
+  formData.append("width", width);
+  formData.append("brightness", brightness);
+
+  convertBtn.disabled = true;
+  convertBtn.textContent = "⏳ Processing...";
+  progressBar.style.width = "0%";
+  statusText.textContent = "Uploading video...";
 
   try {
-    const response = await fetch(API_URL, { method: "POST", body: formData });
-    if (!response.ok) throw new Error("Conversion failed.");
+    const response = await fetch(backendURL, {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error("Server Error: " + response.status);
+    }
+
+    // Track progress (fake progress while waiting)
+    let progress = 0;
+    const progressInterval = setInterval(() => {
+      if (progress < 95) {
+        progress += 5;
+        progressBar.style.width = `${progress}%`;
+        progressText.textContent = `${progress}%`;
+      }
+    }, 400);
 
     const blob = await response.blob();
-    const url = window.URL.createObjectURL(blob);
+    clearInterval(progressInterval);
+
+    progressBar.style.width = "100%";
+    progressText.textContent = "100%";
+    statusText.textContent = "✅ Conversion complete! Downloading file...";
+
+    const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
     a.download = "ascii_video.txt";
     document.body.appendChild(a);
     a.click();
     a.remove();
-
-    statusBox.innerText = "✅ Done! Downloading ASCII video...";
-  } catch (error) {
-    statusBox.innerText = "❌ Error: " + error.message;
+  } catch (err) {
+    statusText.textContent = "❌ " + err.message;
+  } finally {
+    convertBtn.disabled = false;
+    convertBtn.textContent = "🎬 Convert to ASCII";
   }
 });
-
