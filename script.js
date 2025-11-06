@@ -94,7 +94,7 @@ convertBtn.addEventListener("click", async () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "ascii_video.txt";
+    a.download = "ascii_video.mp4";
     document.body.appendChild(a);
     a.click();
     a.remove();
@@ -105,3 +105,4 @@ convertBtn.addEventListener("click", async () => {
     convertBtn.textContent = "🎬 Convert to ASCII";
   }
 });
+
